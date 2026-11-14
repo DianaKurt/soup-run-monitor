@@ -103,30 +103,24 @@ export function downsampleMinMax(points: CleanMetricPoint[], targetWidth: number
 /**
  * Summary Cards
  */
-export function calculateSummary(points: CleanMetricPoint[]): RunSummary {
-  let minLoss = Infinity;
-  let finalLoss = 0;
-  let maxGradNorm = 0;
-  let nanCount = 0;
-
-  for (const p of points) {
-    if (p.loss === null) {
-      nanCount++;
-    } else {
-      if (p.loss < minLoss) minLoss = p.loss;
-      finalLoss = p.loss;
+export function calculateSummary(points: CleanMetricPoint[]) {
+    if (points.length === 0) {
+      return { minLoss: 0, finalLoss: null, maxGradNorm: 0, nanCount: 0, totalPoints: 0 };
     }
-
-    if (p.grad_norm !== null && p.grad_norm > maxGradNorm) {
-      maxGradNorm = p.grad_norm;
-    }
+  
+    const validLossPoints = points.filter((p) => p.loss !== null);
+    const minLoss = validLossPoints.length > 0 ? Math.min(...validLossPoints.map((p) => p.loss as number)) : 0;
+    const lastPoint = points[points.length - 1];
+    const finalLoss = lastPoint ? lastPoint.loss : null;
+  
+    const maxGradNorm = Math.max(...points.map((p) => p.grad_norm ?? 0));
+    const nanCount = points.filter((p) => p.loss === null || p.lr === null || p.grad_norm === null).length;
+  
+    return {
+      minLoss: isFinite(minLoss) ? minLoss : 0,
+      finalLoss,
+      maxGradNorm: isFinite(maxGradNorm) ? maxGradNorm : 0,
+      nanCount,
+      totalPoints: points.length,
+    };
   }
-
-  return {
-    minLoss: minLoss === Infinity ? 0 : minLoss,
-    finalLoss,
-    maxGradNorm,
-    nanCount,
-    totalPoints: points.length,
-  };
-}
