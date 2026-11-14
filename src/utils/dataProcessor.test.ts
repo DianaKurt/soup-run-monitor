@@ -14,7 +14,6 @@ describe('Data Processor & Truthfulness Tests', () => {
 
     expect(cleaned[1].loss).toBeNull();
     expect(cleaned[1].grad_norm).toBeNull();
-    // Убеждаемся, что они не превратились в 0
     expect(cleaned[1].loss).not.toBe(0);
   });
 
@@ -22,23 +21,20 @@ describe('Data Processor & Truthfulness Tests', () => {
     const raw: RawMetricPoint[] = [
       { step: 30, loss: 1.5, lr: 0.001, grad_norm: 1.0 },
       { step: 10, loss: 2.8, lr: 0.001, grad_norm: 1.2 },
-      { step: 30, loss: 1.2, lr: 0.0008, grad_norm: 0.9 }, // дубликат шага 30
+      { step: 30, loss: 1.2, lr: 0.0008, grad_norm: 0.9 }, 
       { step: 20, loss: 2.0, lr: 0.001, grad_norm: 1.1 },
     ];
 
     const cleaned = sanitizePoints(raw);
 
-    // Проверяем сортировку по возрастанию step
     expect(cleaned[0].step).toBe(10);
     expect(cleaned[1].step).toBe(20);
     expect(cleaned[2].step).toBe(30);
-    // Проверяем, что дубликат перезаписался актуальным значением
     expect(cleaned[2].loss).toBe(1.2);
     expect(cleaned.length).toBe(3);
   });
 
   it('should preserve single outlier spikes during Min-Max downsampling', () => {
-    // Создаем 10 000 точек с одним гигантским выбросом в середине
     const raw: RawMetricPoint[] = Array.from({ length: 10000 }, (_, i) => ({
       step: i * 10,
       loss: 1.0 + Math.sin(i / 100) * 0.1,
@@ -46,13 +42,11 @@ describe('Data Processor & Truthfulness Tests', () => {
       grad_norm: 0.5,
     }));
 
-    // Вставляем резкий спайк
     raw[5000].loss = 99.9;
 
     const cleaned = sanitizePoints(raw);
     const downsampled = downsampleMinMax(cleaned, 200);
 
-    // Проверяем, что пик (99.9) не стерся алгоритмом сжатия
     const hasSpike = downsampled.some((p) => p.loss === 99.9);
     expect(hasSpike).toBe(true);
   });
@@ -67,7 +61,7 @@ describe('Data Processor & Truthfulness Tests', () => {
     const summary = calculateSummary(cleaned);
 
     expect(summary.minLoss).toBe(1.0);
-    expect(summary.finalLoss).toBe(null as any); // последняя точка null
+    expect(summary.finalLoss).toBe(null as any);
     expect(summary.maxGradNorm).toBe(2.0);
     expect(summary.nanCount).toBe(1);
     expect(summary.totalPoints).toBe(3);
