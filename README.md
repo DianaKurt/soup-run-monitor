@@ -59,22 +59,23 @@ To quickly verify data truthfulness and edge-case handling in the live demo:
 
 ---
 
+# Testing & QA Verification
+
+Automated Unit Tests: src/utils/dataProcessor.test.ts validates data sanitization, deduplication, and Min-Max spike preservation.
+
+Manual Stress Testing: Verified under extreme workloads (run-03 with 1M points) to ensure smooth canvas interactions and correct gap rendering during NaN anomalies.# soup-run-monitor
+
+
 ## Getting Started & Installation
 
-1. **Clone the repository:**
+ **Clone the repository:**
    ```bash
    git clone <repository-url>
    cd soup-run-monitor
+
  ```bash   
 npm install
 npm run dev
 npm run test
 npm run build
 
-
-
-# Testing & QA Verification
-
-Automated Unit Tests: src/utils/dataProcessor.test.ts validates data sanitization, deduplication, and Min-Max spike preservation.
-
-Manual Stress Testing: Verified under extreme workloads (run-03 with 1M points) to ensure smooth canvas interactions and correct gap rendering during NaN anomalies.# soup-run-monitor
