@@ -129,7 +129,7 @@ export const RunDetail: React.FC<RunDetailProps> = ({ runId, onBack }) => {
               <strong>⚠️ Anomaly Detected ({fullRun.anomalyTag}):</strong> {fullRun.description}
             </div>
           )}
-          
+
           <div className="summary-cards" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))' }}>
             <div className="card">
               <h3>Min Loss</h3>
@@ -137,7 +137,7 @@ export const RunDetail: React.FC<RunDetailProps> = ({ runId, onBack }) => {
             </div>
             <div className="card">
               <h3>Final Loss</h3>
-              <p className="card-val">{summary.finalLoss.toFixed(4)}</p>
+              <p className="card-val">{summary.finalLoss !== null ? summary.finalLoss.toFixed(4) : 'NaN / Gap'}</p>
             </div>
             <div className="card">
               <h3>Max Grad Norm</h3>

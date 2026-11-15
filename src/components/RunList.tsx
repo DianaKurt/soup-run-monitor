@@ -272,7 +272,7 @@ export const RunList: React.FC<RunListProps> = ({ onSelectRun }) => {
                     </td>
                     <td>
                       <span style={{ fontFamily: 'ui-monospace, monospace', fontWeight: 600 }}>
-                        {summary.finalLoss > 0 ? summary.finalLoss.toFixed(4) : 'N/A'}
+                      {summary.finalLoss !== null ? summary.finalLoss.toFixed(4) : 'NaN / Gap'}
                       </span>
                     </td>
                     <td>
