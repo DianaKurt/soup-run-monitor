@@ -23,12 +23,19 @@ export const RunList: React.FC<RunListProps> = ({ onSelectRun }) => {
     return () => clearTimeout(timer);
   }, []);
 
-  const handleKillRun = (e: React.MouseEvent, runId: string) => {
+    const [runToKill, setRunToKill] = useState<string | null>(null);
+
+    const handleKillRun = (e: React.MouseEvent, runId: string) => {
     e.stopPropagation();
-    if (window.confirm(`Are you sure you want to abort training run ${runId}?`)) {
-      setKilledRuns((prev) => ({ ...prev, [runId]: true }));
+     setRunToKill(runId);
+    };
+
+    const confirmKillRun = () => {
+    if (runToKill) {
+     setKilledRuns((prev) => ({ ...prev, [runToKill]: true }));
+     setRunToKill(null);
     }
-  };
+    };
 
   const handleRetrySync = () => {
     setIsRetrying(true);
@@ -355,6 +362,46 @@ export const RunList: React.FC<RunListProps> = ({ onSelectRun }) => {
               </button>
               <button className="btn-primary" disabled={isRetrying} onClick={handleRetrySync}>
                 {isRetrying ? 'Syncing cluster...' : 'Retry Sync'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+        {runToKill && (
+             <div
+                 className="modal-backdrop"
+                 role="dialog"
+                 aria-modal="true"
+                 aria-labelledby="kill-modal-title"
+                 onClick={() => setRunToKill(null)}
+            >
+            <div className="modal-card" onClick={(e) => e.stopPropagation()}>
+            <h3 id="kill-modal-title" className="modal-title" style={{ color: '#dc2626' }}>
+              <span>🛑</span> Abort Training Run
+            </h3>
+            <p style={{ margin: '8px 0 16px 0', color: '#475569', fontSize: '14px' }}>
+              Are you sure you want to abort training run <strong>{runToKill}</strong>? Cluster resources will be released immediately.
+            </p>
+            <div className="modal-actions">
+              <button className="action-btn" onClick={() => setRunToKill(null)}>
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={confirmKillRun}
+                style={{
+                  background: '#dc2626',
+                  color: '#ffffff',
+                  border: 'none',
+                  padding: '8px 16px',
+                  borderRadius: '6px',
+                  fontSize: '13px',
+                  fontWeight: 600,
+                  cursor: 'pointer',
+                }}
+              >
+                Yes, Kill Run
               </button>
             </div>
           </div>
