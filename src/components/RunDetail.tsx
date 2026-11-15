@@ -14,6 +14,7 @@ export const RunDetail: React.FC<RunDetailProps> = ({ runId, onBack }) => {
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [isKilled, setIsKilled] = useState<boolean>(false);
+  const [showKillModal, setShowKillModal] = useState<boolean>(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -51,12 +52,6 @@ export const RunDetail: React.FC<RunDetailProps> = ({ runId, onBack }) => {
   const chartPoints = useMemo(() => {
     return cleanedPoints.length > 2000 ? downsampleMinMax(cleanedPoints, 1000) : cleanedPoints;
   }, [cleanedPoints]);
-
-  const handleKill = () => {
-    if (window.confirm(`Are you sure you want to abort ${runId}? Cluster resources will be released.`)) {
-      setIsKilled(true);
-    }
-  };
 
   const currentStatus = isKilled ? 'failed' : fullRun?.status;
 
@@ -106,7 +101,7 @@ export const RunDetail: React.FC<RunDetailProps> = ({ runId, onBack }) => {
               {currentStatus === 'running' && !isKilled && (
                 <button
                   type="button"
-                  onClick={handleKill}
+                  onClick={() => setShowKillModal(true)}
                   style={{
                     background: '#fef2f2',
                     border: '1px solid #fecaca',
@@ -118,7 +113,7 @@ export const RunDetail: React.FC<RunDetailProps> = ({ runId, onBack }) => {
                     cursor: 'pointer'
                   }}
                 >
-                  🛑 Kill Run ($510)
+                  🛑 Kill Run (${fullRun.costUsd})
                 </button>
               )}
             </div>
@@ -165,6 +160,50 @@ export const RunDetail: React.FC<RunDetailProps> = ({ runId, onBack }) => {
             <RunChart title="Gradient Norm (grad_norm)" data={chartPoints} metricKey="grad_norm" color="#9333ea" />
           </div>
         </>
+      )}
+
+      {/* Кастомное модальное окно для подтверждения Kill Run */}
+      {showKillModal && (
+        <div
+          className="modal-backdrop"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="kill-detail-modal-title"
+          onClick={() => setShowKillModal(false)}
+        >
+          <div className="modal-card" onClick={(e) => e.stopPropagation()}>
+            <h3 id="kill-detail-modal-title" className="modal-title" style={{ color: '#dc2626' }}>
+              <span>🛑</span> Abort Training Run
+            </h3>
+            <p style={{ margin: '8px 0 16px 0', color: '#475569', fontSize: '14px' }}>
+              Are you sure you want to abort training run <strong>{runId}</strong>? Cluster resources will be released immediately.
+            </p>
+            <div className="modal-actions">
+              <button className="action-btn" onClick={() => setShowKillModal(false)}>
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setIsKilled(true);
+                  setShowKillModal(false);
+                }}
+                style={{
+                  background: '#dc2626',
+                  color: '#ffffff',
+                  border: 'none',
+                  padding: '8px 16px',
+                  borderRadius: '6px',
+                  fontSize: '13px',
+                  fontWeight: 600,
+                  cursor: 'pointer',
+                }}
+              >
+                Yes, Kill Run
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );
