@@ -109,12 +109,28 @@ export function calculateSummary(points: CleanMetricPoint[]) {
     }
   
     const validLossPoints = points.filter((p) => p.loss !== null);
-    const minLoss = validLossPoints.length > 0 ? Math.min(...validLossPoints.map((p) => p.loss as number)) : 0;
+  
+    // Безопасный поиск minLoss без деструктуризации (...)
+    let minLoss = 0;
+    if (validLossPoints.length > 0) {
+      minLoss = validLossPoints.reduce((min, p) => (p.loss! < min ? p.loss! : min), validLossPoints[0].loss!);
+    }
+  
+    // Безопасный поиск maxGradNorm без деструктуризации (...)
+    let maxGradNorm = 0;
+    if (points.length > 0) {
+      maxGradNorm = points.reduce((max, p) => {
+        const val = p.grad_norm ?? 0;
+        return val > max ? val : max;
+      }, 0);
+    }
+  
     const lastPoint = points[points.length - 1];
     const finalLoss = lastPoint ? lastPoint.loss : null;
   
-    const maxGradNorm = Math.max(...points.map((p) => p.grad_norm ?? 0));
-    const nanCount = points.filter((p) => p.loss === null || p.lr === null || p.grad_norm === null).length;
+    const nanCount = points.filter(
+      (p) => p.loss === null || p.lr === null || p.grad_norm === null
+    ).length;
   
     return {
       minLoss: isFinite(minLoss) ? minLoss : 0,
